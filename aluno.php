@@ -1,10 +1,33 @@
 <?php
 include('conexao.php');
+date_default_timezone_set('UTC');
 
 $query = $conn->query("SELECT * FROM aluno");
-$resultado = $query->fetchAll(PDO::FETCH_ASSOC);
-foreach($resultado as $item){
-   echo $item['nome'];
+$alunos = $query->fetchAll(PDO::FETCH_ASSOC);
+
+
+function busca_curso($cod_curso){
+include('conexao.php');
+
+ $query = $conn->query("SELECT descricao FROM curso WHERE id = $cod_curso");
+ $resultado = $query->fetchAll(PDO::FETCH_ASSOC);
+
+ return $resultado; 
+}
+
+function busca_cursos(){
+  include('conexao.php');
+  
+   $query = $conn->query("SELECT * FROM curso");
+   $resultado = $query->fetchAll(PDO::FETCH_ASSOC);
+  
+   return $resultado; 
+  }
+
+function calcula_idade($nascimento){
+
+  $ano_atual = date('Y'); 
+  return $ano_atual - $nascimento;
 }
 
 ?>
@@ -27,35 +50,97 @@ foreach($resultado as $item){
        <?php include 'menu.html'; ?>
 
         <div class="table-responsive">
-            <table class="table table-striped">
+          <h1 class="mt-5">Alunos</h1>
+
+          <!-- Button trigger modal -->
+          <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          + Novo
+          </button>
+          <hr>
+
+         
+
+
+          <table class="table table-striped">
                 <thead>
                     <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Last</th>
-                    <th scope="col">Handle</th>
+                    <th scope="col">ID</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Curso</th>
+                    <th scope="col">Idade</th>
+                    <th scope="col">Ações</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
                     </tr>
                 </thead>
+
+                <?php foreach($alunos as $item){ ?>
+ 
                 <tbody>
                     <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                    </tr>
-                    <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                    </tr>
-                    <tr>
-                    <th scope="row">3</th>
-                    <td colspan="2">Larry the Bird</td>
-                    <td>@twitter</td>
-                    </tr>
+                    <th scope="row"><?php echo $item['id'];?></th>
+                    <td><?php echo $item['nome'];?></td>
+                    <td>
+                      
+                      <?php
+                        foreach(busca_curso( $item['cod_curso'] ) as $curso){
+                          echo $curso['descricao'];
+                        };
+                      ?>
+
+                    </td>
+                    <td><?php echo calcula_idade( $item['nascimento'] );?></td>
+                    <td><a href="" class="btn btn-warning btn-sm">Visualizar</a></td>
+                    <td><a href="" class="btn btn-info btn-sm">Editar</a></td>
+                    <td><a href="" class="btn btn-danger btn-sm">Excluir</a></td>
+                  </tr>
+                   
+               <?php } ?>
+                    
                 </tbody>
             </table>
+
+
+
+             <!-- Modal -->
+          <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="exampleModalLabel">Cadastro de aluno</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+          <form action="#" method="POST">
+                        
+                <div class="mb-3">
+                  <label for="exampleFormControlInput1" class="form-label">Nome Completo</label>
+                  <input type="text" class="form-control" id="exampleFormControlInput1" required placeholder="Nome do aluno">
+                </div>
+                <div class="mb-3">
+                  <label for="exampleFormControlInput1" class="form-label">Nascimento</label>
+                  <input type="date" class="form-control" id="exampleFormControlInput1" required placeholder="">
+                </div>
+              <div class="mb-3">
+                  <label for="exampleFormControlInput1" class="form-label">Curso</label>
+                  <select class="form-select" aria-label="Default select example" required>
+                   <?php foreach(busca_cursos() as $cursos){ ?>
+                      <option value=" <?php echo $cursos['id']; ?>"><?php echo $cursos['descricao']; ?></option> 
+                   <?php }; ?> 
+
+                  </select>
+              </div>
+
+            </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="submit" class="btn btn-success">Cadastrar</button>
+                </div>
+          </form>
+              </div>
+            </div>
+          </div>
         </div>
     </div>
 
